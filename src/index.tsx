@@ -1,3 +1,3 @@
-import Poll from './Poll';
+import { Poll, Answer } from './Poll';
 
-export { Poll };
+export { Poll, Answer };
