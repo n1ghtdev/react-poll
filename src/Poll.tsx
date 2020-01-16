@@ -1,19 +1,32 @@
 import React from 'react';
+import './Poll.scss';
 
 interface AnswerProps {
   answer: string;
   id: number;
   votes: number;
+  active?: number;
   onAnswer?: (id: number) => void;
 }
 
-export function Answer({ answer, id, onAnswer }: AnswerProps) {
+export function Answer({ answer, id, active, onAnswer }: AnswerProps) {
+  const checked = id === active ? true : false;
   return (
-    <li className="poll__answer">
-      <button type="button" onClick={() => onAnswer && onAnswer(id)}>
-        {answer}
-      </button>
-    </li>
+    <label
+      htmlFor={`answer-${id}`}
+      className="poll__answer"
+      onClick={() => {
+        if (onAnswer) onAnswer(id);
+      }}
+    >
+      <span className="poll__radio">
+        <input id={`answer-${id}`} type="radio" />
+        <div className={`poll_c-radio ${checked ? 'checked' : ''}`}>
+          <div className={`poll_c-radio-inner ${checked ? 'checked' : ''}`} />
+        </div>
+      </span>
+      <span>{answer}</span>
+    </label>
   );
 }
 
@@ -44,13 +57,13 @@ interface IProps {
 }
 interface IState {
   voted: boolean;
-  selectedAnswer: number | undefined;
+  selectedAnswer: number | boolean;
   totalVotes: number;
 }
 
 const initialState: IState = {
   voted: false,
-  selectedAnswer: undefined,
+  selectedAnswer: false,
   totalVotes: 0,
 };
 
@@ -143,14 +156,13 @@ export class Poll extends React.Component<IProps, IState> {
       this.props.onPollSubmit(this.state.selectedAnswer, event);
   };
 
-  /* set selected answer's id to state */
-  onAnswerChange = (id: number, votes: number) => {
+  /* sets selected answer's id to state */
+  onAnswerChange = (id: number) => {
     this.setState({ selectedAnswer: id });
   };
   render() {
-    // TODO: {state, props} = this instead
-    const { question, voted, children } = this.props;
-    const answersVotes = React.Children.map(children, child => {
+    const { state, props } = this;
+    const answersVotes = React.Children.map(props.children, child => {
       if (!React.isValidElement(child)) return;
 
       return (
@@ -162,20 +174,32 @@ export class Poll extends React.Component<IProps, IState> {
       );
     });
 
-    const childrenWithEvent = React.Children.map(children, child =>
-      React.cloneElement(child as React.ReactElement<any>, {
-        onAnswer: this.onAnswerChange,
-      }),
-    );
+    const childrenWithEvent = React.Children.map(props.children, child => {
+      if (!React.isValidElement(child)) return;
+
+      // return React.cloneElement(child as React.ReactElement<any>, {
+      //   onAnswer: this.onAnswerChange,
+      //   active: this.state.selectedAnswer,
+      // });
+
+      // No need to clone each time render fires
+      return (
+        <Answer
+          {...child.props}
+          onAnswer={this.onAnswerChange}
+          active={state.selectedAnswer}
+        />
+      );
+    });
 
     const canVote =
-      voted !== undefined ? (!voted ? true : false) : !this.state.voted;
+      props.voted !== undefined ? (!props.voted ? true : false) : !state.voted;
     return (
       <form onSubmit={this.submitPoll} className="poll__component">
-        <span className="poll__title">{question}</span>
-        <ul className="poll__answers">
+        <fieldset className="poll__answers">
+          <legend className="poll__title">{props.question}</legend>
           {canVote ? childrenWithEvent : answersVotes}
-        </ul>
+        </fieldset>
         <button type="submit">Submit</button>
       </form>
     );

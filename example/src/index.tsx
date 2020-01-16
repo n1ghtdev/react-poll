@@ -25,7 +25,7 @@ const App = () => {
     <Poll id="qwe" question="Question 1" onPollSubmit={onSubmit}>
       {answers.map((answer: any, index: number) => (
         <Answer
-          key={index}
+          key={answer.id}
           id={answer.id}
           answer={answer.question}
           votes={answer.votes}

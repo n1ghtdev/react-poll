@@ -29,7 +29,8 @@ export default {
     // }),
     external(),
     postcss({
-      modules: true,
+      extensions: ['.css', '.sass', '.scss'],
+      inject: true,
     }),
     resolve(),
     typescript({
