@@ -20,7 +20,15 @@ export function Answer({ answer, id, active, onAnswer }: AnswerProps) {
       }}
     >
       <span className="poll__radio">
-        <input id={`answer-${id}`} type="radio" />
+        <input
+          id={`answer-${id}`}
+          type="radio"
+          value={answer}
+          checked={checked}
+          onChange={() => {
+            if (onAnswer) onAnswer(id);
+          }}
+        />
         <div className={`poll_c-radio ${checked ? 'checked' : ''}`}>
           <div className={`poll_c-radio-inner ${checked ? 'checked' : ''}`} />
         </div>
